@@ -29,12 +29,21 @@ export class ListenerManager {
             player.play_pause();
         }
         if (e.state == "DOWN" && e.name == "A" && down["LEFT CTRL"] && down["F1"]) {
-            console.log("ernesto");
-            
+            // AddSong
             Keyboard.removeListener(ListenerManager._mainListenerBind);
         }
     
         if (e.state == "DOWN" && e.name == "E" && down["LEFT CTRL"] && down["F1"]) {
         }
+    }
+
+
+    public static _addSongListenerBind : any;
+    public static addSongListenerBind(bind : any) {
+        ListenerManager._addSongListenerBind = bind;
+    }
+
+    public static addSongListener(e: IGlobalKeyEvent, down: IGlobalKeyDownMap) {
+        
     }
 }
