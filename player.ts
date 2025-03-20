@@ -10,7 +10,7 @@ export enum PlayerState{
 
 export class Player {
 
-    private readonly dir = path.resolve("./temp") + "/";
+    private readonly dir;
 
     private readonly ytUrlPrefix = "https://www.youtube.com/watch?v=";
 
@@ -23,6 +23,13 @@ export class Player {
     private playerState = PlayerState.Idle;
 
     private currentSongPath = "";
+
+    constructor(){
+        this.dir = path.resolve("./temp") + "/";
+        if (!fs.existsSync(this.dir)) {
+            fs.mkdirSync(this.dir)
+        }
+    }
 
     public searchAndPlay(keyword: string) {
         let self = this;

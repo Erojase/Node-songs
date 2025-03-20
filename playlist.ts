@@ -40,27 +40,23 @@ export class Playlist {
         return playlists.map((filename, index) => index + " - "+filename.split(".")[0]);
     }
 
-    public async AddSong(playlist: string, song:string) {
+    public async AddSong(playlistName: string, song:string) {
         console.log("Adding song "+song);
-        if (!fs.existsSync(this._defaultPlaylistPath+"/"+playlist+".json")) {
-            this.CreatePlaylist(playlist.toString());
+        if (!fs.existsSync(this._defaultPlaylistPath+"/"+playlistName+".json")) {
+            this.CreatePlaylist(playlistName.toString());
         }
-        let list:IPlaylist = JSON.parse(fs.readFileSync(this._defaultPlaylistPath+"/"+playlist+".json", { encoding: "utf-8"}));
+        let list:IPlaylist = JSON.parse(fs.readFileSync(this._defaultPlaylistPath+"/"+playlistName+".json", { encoding: "utf-8"}));
         let url = await this.player.searchUrl(song);
         list.songs.push({
             name: song,
             link: url
         });
-        fs.writeFileSync(this._defaultPlaylistPath+"/"+playlist+".json", JSON.stringify(list));
+        fs.writeFileSync(this._defaultPlaylistPath+"/"+playlistName+".json", JSON.stringify(list));
         return true;
     }
 
-    public PlayPlaylist(playlist: Number | string){
-        if (typeof playlist == typeof 0) {
-            
-        } else {
-
-        }
+    public PlayPlaylist(playlistName: string){
+        
     }
 
 
