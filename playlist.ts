@@ -1,6 +1,6 @@
 import path from "path";
 import fs from 'fs';
-import {search} from './player.ts';
+import { Player} from './player.ts';
 
 export interface IPlaylist{
     name: string;
@@ -17,10 +17,13 @@ export class Playlist {
 
     private readonly _defaultPlaylistPath : string = path.resolve("./playlists");
 
+    private player: Player;
+
     constructor() {
         if (!fs.existsSync(this._defaultPlaylistPath)) {
             fs.mkdirSync(this._defaultPlaylistPath);
         }
+        this.player = new Player();
     }
 
     public CreatePlaylist(name:string): void {
@@ -43,7 +46,7 @@ export class Playlist {
             this.CreatePlaylist(playlist.toString());
         }
         let list:IPlaylist = JSON.parse(fs.readFileSync(this._defaultPlaylistPath+"/"+playlist+".json", { encoding: "utf-8"}));
-        let url = await search(song);
+        let url = await this.player.searchUrl(song);
         list.songs.push({
             name: song,
             link: url
