@@ -29,7 +29,7 @@ export class Player {
         let name = keyword.replaceAll(" ","_");        
         fs.rmSync(this.dir, { recursive: true });
         fs.mkdirSync(this.dir);
-        execFile("resources/yt-dlp.exe", ["-x", `ytsearch:${keyword}`, "-o", this.dir + name], async function (err, data) {
+        execFile("resources/yt-dlp_macos", ["-x", `ytsearch:${keyword}`, "-o", this.dir + name], async function (err, data) {
             console.log(err)
             console.log(data.toString());
             await self.toWav(self.dir + name+".opus", name).then(() => {
@@ -41,7 +41,7 @@ export class Player {
 
     public searchUrl(keyword: string) {
         return new Promise<string>((resolve, reject) => {
-            execFile("resources/yt-dlp.exe", [`ytsearch:${keyword}`, "--skip-download", "--get-id"], async function (err, data) {
+            execFile("resources/yt-dlp_macos", [`ytsearch:${keyword}`, "--skip-download", "--get-id"], async function (err, data) {
                 if (err) console.log(err);
                 resolve(this.ytUrlPrefix + data.toString().trim());
             });
@@ -68,7 +68,7 @@ export class Player {
         this.playerState = PlayerState.Playing;
         this.currentSongPath = path;
         this.startTime = Date.now()/1000;
-        this.currentSongProcess = execFile("resources/ffplay.exe", ["-i", this.currentSongPath, "-autoexit", "-nodisp"]);
+        this.currentSongProcess = execFile("resources/ffplay", ["-i", this.currentSongPath, "-autoexit", "-nodisp"]);
         this.currentSongProcess.on("exit", ()=>{
             this.playerState = PlayerState.Idle;
         })
@@ -88,14 +88,14 @@ export class Player {
 
     public async resume() {
         this.playerState = PlayerState.Playing;
-        this.currentSongProcess = execFile("resources/ffplay.exe", ["-ss", new Date(this.currentTime * 1000).toISOString().slice(11, 19), "-i", this.currentSongPath, "-autoexit", "-nodisp"]);
+        this.currentSongProcess = execFile("resources/ffplay", ["-ss", new Date(this.currentTime * 1000).toISOString().slice(11, 19), "-i", this.currentSongPath, "-autoexit", "-nodisp"]);
         console.log(`Song resumed at ${new Date(this.currentTime * 1000).toISOString().slice(11, 19)}`);
     }
     
 
     private async toWav(filepath: string, name:string) {
         return new Promise<void>((resolve, reject) => {
-            execFile("resources/ffmpeg.exe", ["-i", filepath, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", this.dir +name+".wav"], (err, data) => {
+            execFile("resources/ffmpeg", ["-i", filepath, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", this.dir +name+".wav"], (err, data) => {
                 if (err) {
                     reject();
                     return;
