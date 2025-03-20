@@ -34,7 +34,7 @@ async function menu() {
 
         for (let i = 0; i < optionsKeys.length; i++) {
             if (cursorPos == i) {
-                process.stdout.write(`<${optionsKeys[i]}>`);
+                process.stdout.write(`> ${optionsKeys[i]}`);
             } else {
                 process.stdout.write(optionsKeys[i]);
             }
