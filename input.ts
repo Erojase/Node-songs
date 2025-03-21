@@ -28,20 +28,27 @@ export class Input {
         });
     }
 
-    public async getWord(show:boolean) {
-        return new Promise<string>((resolve, reject) => {
-            let word = "";
-            process.stdin.once('keypress', function (ch, key) {
-                if (key.name == "return") {
-                    resolve(word);
-                    process.stdin.pause();
-                    return;
+    public async getWord() {
+        let word = "";
+        let exit = false;
+        return new Promise<string>(async (resolve, reject) => {
+            while (!exit) {
+                let char = await this.getCharacter();              
+                if (char == "return") {
+                    exit = true;
+                }else if (char == "backspace") {
+                    word = word.substring(0, word.length-1);
+                } else if (char == "space") {
+                    word += " ";
+                    process.stdout.write(" ");
+                } else {
+                    word += char;
+                    process.stdout.write(char);
                 }
-                word += key.name;
-                if (show) {
-                    process.stdout.write(key.name);
-                }
-            });
+            }
+            process.stdout.write("\n");
+            resolve(word);
+            return;
         });
     }
 }

@@ -3,5 +3,7 @@ export class KEYS {
 
     public static LEFT = "left";
     public static RIGHT = "right";
+    public static UP = "up";
+    public static DOWN = "down";
     public static ENTER = "return";
 }

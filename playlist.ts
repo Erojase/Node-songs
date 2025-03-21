@@ -37,7 +37,7 @@ export class Playlist {
 
     public ListPlaylists(): string[]{
         let playlists = fs.readdirSync(this._defaultPlaylistPath);
-        return playlists.map((filename, index) => index + " - "+filename.split(".")[0]);
+        return playlists.map((filename) => filename.split(".")[0]);
     }
 
     public async AddSong(playlistName: string, song:string) {

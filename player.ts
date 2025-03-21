@@ -47,10 +47,11 @@ export class Player {
     }
 
     public searchUrl(keyword: string) {
+        let self = this;
         return new Promise<string>((resolve, reject) => {
             execFile("resources/yt-dlp.exe", [`ytsearch:${keyword}`, "--skip-download", "--get-id"], async function (err, data) {
                 if (err) console.log(err);
-                resolve(this.ytUrlPrefix + data.toString().trim());
+                resolve(self.ytUrlPrefix + data.toString().trim());
             });
         })
     
