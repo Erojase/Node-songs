@@ -1,15 +1,22 @@
 import { Input } from "./input";
 import { KEYS } from "./keys";
+import { Player } from "./player";
 import { Playlist } from './playlist';
 
 export class Menu {
 
     private static Options = {
+        "Play Song": Menu.playSong,
         "List Playlists": () => { },
         "Create Playlist": () => { },
         "Play Playlist": () => { },
         "Add Song": Menu.addSong,
         Exit: () => { console.clear(); process.exit(); }
+    }
+
+    private static nowPlaying = {
+        playing : false,
+        songName : ""
     }
 
     private static input = new Input();
@@ -20,7 +27,13 @@ export class Menu {
         let exit = false;
         while (!exit) {
             console.clear();
-            process.stdout.write("<------------------ Music I Guess ------------------>\n");
+            let mainTitle = "Music I Guess";
+            let terminalLenght = (process.stdout.columns/2)-(4+mainTitle.length)
+            let dashes = "";
+            for (let i = 0; i < terminalLenght; i++) {
+                dashes += "-";
+            }
+            process.stdout.write(`<${dashes} ${mainTitle} ${dashes}>\n`);
             process.stdout.write("\n");
 
             for (let i = 0; i < optionsKeys.length; i++) {
@@ -30,6 +43,11 @@ export class Menu {
                     process.stdout.write(optionsKeys[i]);
                 }
                 process.stdout.write('   ');
+            }
+            
+            if (this.nowPlaying.playing) {
+                process.stdout.write('\n\n\n\n\n');
+                process.stdout.write(`Now playing: ${this.nowPlaying.songName}`);
             }
 
             switch (await Menu.input.getCharacter()) {
@@ -48,13 +66,29 @@ export class Menu {
                     }
                     break;
                 case KEYS.ENTER:
-                    // exit = true;
                     await Menu.Options[optionsKeys[cursorPos]]();
                     break;
                 default:
                     break;
             }
 
+        }
+    }
+
+    public static async playSong() { 
+        console.clear();
+        let player = new Player();
+        process.stdout.write("Enter the name of the song: ")
+        let song = await Menu.input.getWord();
+        player.searchAndPlay(song, ()=>{
+            Menu.nowPlaying = {
+                playing: false,
+                songName: ""
+            }
+        });
+        Menu.nowPlaying = {
+            playing: true,
+            songName: song
         }
     }
 
@@ -65,7 +99,7 @@ export class Menu {
         let exit = false;
         while (!exit) {
             console.clear();
-            process.stdout.write("<------------------ Select playlist or create one ------------------>\n");
+            process.stdout.write("<------------------ Select playlist ------------------>\n");
 
             for (let i = 0; i < playlists.length; i++) {
                 const element = playlists[i];

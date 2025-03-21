@@ -31,17 +31,16 @@ export class Player {
         }
     }
 
-    public searchAndPlay(keyword: string) {
+    public searchAndPlay(keyword: string, finishCallback:any) {
         let self = this;
         let name = keyword.replaceAll(" ","_");        
         fs.rmSync(this.dir, { recursive: true });
         fs.mkdirSync(this.dir);
         execFile("resources/yt-dlp.exe", ["-x", `ytsearch:${keyword}`, "-o", this.dir + name], async function (err, data) {
             console.log(err)
-            console.log(data.toString());
             await self.toWav(self.dir + name+".opus", name).then(() => {
                 fs.unlinkSync(self.dir + name+".opus")
-                self.play(self.dir + name+".wav");
+                self.play(self.dir + name+".wav", finishCallback);
             });
         });
     }
@@ -72,13 +71,14 @@ export class Player {
         }
     }
 
-    public async play(path: string) {
+    public async play(path: string, finishCallback:any) {
         this.playerState = PlayerState.Playing;
         this.currentSongPath = path;
         this.startTime = Date.now()/1000;
         this.currentSongProcess = execFile("resources/ffplay.exe", ["-i", this.currentSongPath, "-autoexit", "-nodisp"]);
         this.currentSongProcess.on("exit", ()=>{
             this.playerState = PlayerState.Idle;
+            finishCallback();
         })
     }
 
