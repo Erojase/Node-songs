@@ -5,8 +5,11 @@ import { Playlist } from './playlist';
 
 export class Menu {
 
+    public static player:Player;
+
     private static Options = {
         "Play Song": Menu.playSong,
+        "Volume": () => {}, // something like this <||||||    >
         "List Playlists": () => { },
         "Create Playlist": () => { },
         "Play Playlist": () => { },
@@ -77,10 +80,10 @@ export class Menu {
 
     public static async playSong() { 
         console.clear();
-        let player = new Player();
+
         process.stdout.write("Enter the name of the song: ")
         let song = await Menu.input.getWord();
-        player.searchAndPlay(song, ()=>{
+        Menu.player.searchAndPlay(song, ()=>{
             Menu.nowPlaying = {
                 playing: false,
                 songName: ""
@@ -93,7 +96,7 @@ export class Menu {
     }
 
     public static async addSong() {
-        let playlist = new Playlist();
+        let playlist = new Playlist(Menu.player);
         let playlists = playlist.ListPlaylists();
         let cursorPos = 0;
         let exit = false;

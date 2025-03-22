@@ -14,6 +14,8 @@ export class Player {
 
     private readonly ytUrlPrefix = "https://www.youtube.com/watch?v=";
 
+    public volume = 100;
+
     private startTime = 0;
 
     private currentTime = 0;
@@ -31,18 +33,23 @@ export class Player {
         }
     }
 
-    public searchAndPlay(keyword: string, finishCallback:any) {
-        let self = this;
-        let name = keyword.replaceAll(" ","_");        
-        fs.rmSync(this.dir, { recursive: true });
-        fs.mkdirSync(this.dir);
-        execFile("resources/yt-dlp.exe", ["-x", `ytsearch:${keyword}`, "-o", this.dir + name], async function (err, data) {
-            console.log(err)
-            await self.toWav(self.dir + name+".opus", name).then(() => {
-                fs.unlinkSync(self.dir + name+".opus")
-                self.play(self.dir + name+".wav", finishCallback);
+    public async searchAndPlay(keyword: string, finishCallback:any) {
+        let self = this; 
+        let id = await this.searchId(keyword);
+        if (fs.existsSync(this.dir+id+".wav")) {
+            this.play(self.dir + id+".wav", finishCallback);
+        } else {
+            execFile("resources/yt-dlp.exe", ["-x", `${this.ytUrlPrefix+id}`, "-o", this.dir + id], async function (err, data) {
+            if (err) {
+                console.log(err)
+            }
+            await self.toWav(self.dir + id+".opus", id).then(() => {
+                fs.unlinkSync(self.dir + id+".opus")
+                self.play(self.dir + id+".wav", finishCallback);
             });
         });
+        }
+        
     }
 
     public searchUrl(keyword: string) {
@@ -53,7 +60,15 @@ export class Player {
                 resolve(self.ytUrlPrefix + data.toString().trim());
             });
         })
-    
+    }
+
+    public searchId(keyword: string) {
+        return new Promise<string>((resolve, reject) => {
+            execFile("resources/yt-dlp.exe", [`ytsearch:${keyword}`, "--skip-download", "--get-id"], async function (err, data) {
+                if (err) console.log(err);
+                resolve(data.toString().trim());
+            });
+        })
     }
 
     public play_pause(){     
@@ -72,10 +87,11 @@ export class Player {
     }
 
     public async play(path: string, finishCallback:any) {
+        this.pause();
         this.playerState = PlayerState.Playing;
         this.currentSongPath = path;
         this.startTime = Date.now()/1000;
-        this.currentSongProcess = execFile("resources/ffplay.exe", ["-i", this.currentSongPath, "-autoexit", "-nodisp"]);
+        this.currentSongProcess = execFile("resources/ffplay.exe", ["-i", this.currentSongPath, "-autoexit", "-nodisp", "-volume", `${this.volume}`]);
         this.currentSongProcess.on("exit", ()=>{
             this.playerState = PlayerState.Idle;
             finishCallback();
@@ -84,13 +100,10 @@ export class Player {
 
     public pause() {
         if (this.currentSongProcess) {
-            this.currentTime = Date.now()/1000 - this.startTime; 
             this.currentSongProcess.kill();
-            if(this.currentSongProcess.killed) {
-                setTimeout(()=>{this.playerState = PlayerState.Paused;}, 50);
-            }
+            this.currentTime = Date.now()/1000 - this.startTime; 
+            this.playerState = PlayerState.Paused;
             console.log(`Song stopped at ${new Date(this.currentTime * 1000).toISOString().slice(11, 19)}`);
-            
         }
     }
 

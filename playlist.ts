@@ -19,11 +19,11 @@ export class Playlist {
 
     private player: Player;
 
-    constructor() {
+    constructor(player:Player) {
         if (!fs.existsSync(this._defaultPlaylistPath)) {
             fs.mkdirSync(this._defaultPlaylistPath);
         }
-        this.player = new Player();
+        this.player = player;
     }
 
     public CreatePlaylist(name:string): void {
