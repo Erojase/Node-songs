@@ -8,6 +8,11 @@ export enum PlayerState{
     Playing = 2
 }
 
+export interface songData{
+    id:string
+    duration:string
+}
+
 export class Player {
 
     private readonly dir;
@@ -35,21 +40,29 @@ export class Player {
 
     public async searchAndPlay(keyword: string, finishCallback:any) {
         let self = this; 
-        let id = await this.searchId(keyword);
-        if (fs.existsSync(this.dir+id+".wav")) {
-            this.play(self.dir + id+".wav", finishCallback);
+        let song = await this.searchId(keyword);
+        if (fs.existsSync(this.dir+song.id)) {
+            this.play(self.dir + song.id+".wav", finishCallback);
         } else {
-            execFile("resources/yt-dlp_macos", ["-x", `${this.ytUrlPrefix+id}`, "-o", this.dir + id], async function (err, data) {
+            fs.mkdirSync(this.dir+song.id);
+            execFile("resources/yt-dlp_macos", ["-x", `${this.ytUrlPrefix+song.id}`, "-o", this.dir + song.id], async function (err, data) {
             if (err) {
                 console.log(err)
             }
-            await self.toWav(self.dir + id+".opus", id).then(() => {
-                fs.unlinkSync(self.dir + id+".opus")
-                self.play(self.dir + id+".wav", finishCallback);
+            await self.toWav(self.dir + song.id+".opus", song.id).then(() => {
+                fs.unlinkSync(self.dir + song.id+".opus")
+                self.play(self.dir + song.id+".wav", finishCallback);
             });
         });
         }
-        
+    }
+
+    private async downloadWithDuration(songId:string, duration:string){
+        dur
+        for (let i = 0; i < 3; i++) {
+            
+            
+        }
     }
 
     public searchUrl(keyword: string) {
@@ -63,10 +76,13 @@ export class Player {
     }
 
     public searchId(keyword: string) {
-        return new Promise<string>((resolve, reject) => {
-            execFile("resources/yt-dlp_macos", [`ytsearch:${keyword}`, "--skip-download", "--get-id"], async function (err, data) {
+        return new Promise<songData>((resolve, reject) => {
+            execFile("resources/yt-dlp_macos", [`ytsearch:${keyword}`, "--skip-download", "--get-id", "--get-duration"], async function (err, data) {
                 if (err) console.log(err);
-                resolve(data.toString().trim());
+                let array = data.split("\n");
+                // array[0] id
+                // array[1] duration ex. 3:32
+                resolve({id:array[0].trim(), duration: array[1].trim()});
             });
         })
     }
